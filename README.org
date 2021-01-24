@@ -38,7 +38,13 @@ grep into the word list files.
 
 ** Installation
 
-Hopefully on MELPA soon.
+Hopefully from MELPA one day. As long as it is not, it is probably easiest to use
+[[https://github.com/raxod502/straight.el][straight.el]]. Put the following lines into your init file.
+
+#+BEGIN_EXAMPLE emacs-lisp
+(straight-use-package
+ '(company-wordfreq :type git :host github :repo "johannes-mueller/company-wordfreq.el"))
+#+END_EXAMPLE
 
 ** Configuration
 
