@@ -1,0 +1,43 @@
+name: Tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.org'
+  push:
+    paths-ignore:
+      - '**.org'
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        emacs_version:
+          - '27.1'
+          - 'snapshot'
+        include:
+          - emacs_version: 'snapshot'
+            allow_failure: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+
+      - name: Install cask
+        run: 'curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python'
+
+      - name: Install dependencies
+        run: '$HOME/.cask/bin/cask install'
+
+      - name: Run tests
+        if: matrix.allow_failure != true
+        run: '$HOME/.cask/bin/cask exec ert-runner'
+
+      - name: Run tests (allow failure)
+        if: matrix.allow_failure == true
+        run: $HOME/.cask/bin/cask exec ert-runner || true

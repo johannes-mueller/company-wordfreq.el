@@ -1,0 +1,58 @@
+* company-wordfreq
+
+A company-backend for human language texts based on word frequency
+dictionaries.
+
+** Synopsis
+
+=company-wordfreq= is a company backup intended for writing texts in a human
+language.  The completions it proposes are words already used in the current
+(or another open) buffer and matching words from a word list file.  This word
+list file is supposed to be a simple list of words ordered by the frequency the
+words are used in the language.  So the first completions are words already
+used in the buffer followed by matching words of the language ordered by
+frequency.
+
+** Word list files
+
+=company-wordfreq= does not come with the word list files, so you have to
+provide them yourself.  A good source for many languages is
+[[https://github.com/hermitdave/FrequencyWords.]] In the files that are provided in
+this repo the words come with a frequency value.  You have to clean those out,
+for example by
+#+BEGIN_EXAMPLE
+    $ sed -i 's/ [0-9].*$//' <filename>
+#+END_EXAMPLE
+
+The directory where the word list files reside is determined by the variable
+==company-word-freq-path==, default =~/.emacs.d/wordfreq-dicts=.  Their names
+must follow the pattern =<language>.txt= where language is the
+=ispell-local-dictionary= value of the current language.
+
+** Further requirements
+
+You need =rg= alias ripgrep in your =$PATH= as =company-wordfreq= uses it to
+grep into the word list files.
+
+** Installation
+
+Hopefully on MELPA soon.
+
+** Configuration
+
+=company-wordfreq= is supposed to be the one and only company backend and
+=company-mode= should not transform or sort its candidates.  This can be
+achieved by setting the variables =company-backends= and =company-transformers=
+buffer locally in =text-mode= buffers by
+
+#+BEGIN_EXAMPLE emacs-lisp
+(add-hook 'text-mode-hook (lambda ()
+                            (setq-local company-backends '(company-wordfreq))
+                            (setq-local company-transformers nil)))
+#+END_EXAMPLE
+
+** Status
+
+This is basically the result of a Saturday afternoon hack.  So probably not
+everything will work under any circumstances.  Bug reports and feedback welcome
+in the issue tracker.  Pull requests also, of course.
