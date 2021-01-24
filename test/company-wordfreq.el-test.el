@@ -1,3 +1,11 @@
+;;; company-wordfreq.el-test.el --- Tests for company-wordfreq
+
+;;; Commentary:
+
+;; usually run by ert-runner
+
+;;; Code:
+
 (require 'mocker)
 (require 'company-wordfreq)
 
