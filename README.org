@@ -1,3 +1,5 @@
+[[https://github.com/johannes-mueller/company-wordfreq.el/actions?query=workflow%3ATests][https://github.com/johannes-mueller/company-wordfreq.el/workflows/Tests/badge.svg]]
+
 * company-wordfreq
 
 A company-backend for human language texts based on word frequency
