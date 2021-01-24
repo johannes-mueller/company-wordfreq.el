@@ -18,10 +18,9 @@ frequency.
 ** Word list files
 
 =company-wordfreq= does not come with the word list files, so you have to
-provide them yourself.  A good source for many languages is
-[[https://github.com/hermitdave/FrequencyWords.]] In the files that are provided in
-this repo the words come with a frequency value.  You have to clean those out,
-for example by
+provide them yourself.  A good source for many languages is [[https://github.com/hermitdave/FrequencyWords][FrequencyWords]]. In
+the files that are provided in that repo the words come with a frequency value.
+You have to clean those out, for example by
 #+BEGIN_EXAMPLE
     $ sed -i 's/ [0-9].*$//' <filename>
 #+END_EXAMPLE
