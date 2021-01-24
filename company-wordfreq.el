@@ -10,15 +10,12 @@
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation version 2.
+;; the Free Software Foundation version 2. <https://www.gnu.org/licenses/>
 
-;; GNU Emacs is distributed in the hope that it will be useful,
+;; This package is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -78,7 +75,7 @@ A warning is issued if it can't be found on loading."
     (warn "No rg executable found in PATH.")))
 
 (defun company-wordfreq--dictionary ()
-  "Determines the path of the word list file."
+  "Determine the path of the word list file."
   (concat (file-name-as-directory company-wordfreq-path) ispell-local-dictionary ".txt"))
 
 (defun company-wordfreq--candidates (prefix)
