@@ -69,8 +69,9 @@
     (should (equal (company-wordfreq 'candidates "bar") '("bar" "barbar" "barbaz")))))
 
 (ert-deftest test-backend-candidates-bar-deduplicate ()
-  (mocker-let ((company-wordfreq--candidates (prefix) ((:input '("bar") :output '("bar" "barbar" "bar" "barbaz"))))
-	       (company-dabbrev (cmd arg) ((:input '(candidates "bar") :output nil))))
+  (mocker-let
+      ((company-wordfreq--candidates (prefix) ((:input '("bar") :output '("bar" "barbar" "bar" "barbaz"))))
+       (company-dabbrev (cmd arg) ((:input '(candidates "bar") :output nil))))
     (should (equal (company-wordfreq 'candidates "bar") '("bar" "barbar" "barbaz")))))
 
 (ert-deftest test-backend-sorted ()
@@ -81,5 +82,9 @@
 
 (ert-deftest test-backend-duplicates ()
   (should (eq (company-wordfreq 'duplicates) nil)))
+
+(ert-deftest test-wordfreq-path-default ()
+  (let ((user-emacs-directory "/home/user/.emacs.d"))
+    (should (equal (company-wordfreq--default-path) "/home/user/.emacs.d/wordfreq-dicts"))))
 
 ;;; company-wordfreq.el-test.el ends here

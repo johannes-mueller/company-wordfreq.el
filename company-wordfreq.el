@@ -57,7 +57,11 @@
 (require 'cl-macs)
 (require 'company)
 
-(defcustom company-wordfreq-path (file-truename "~/.emacs.d/dicts/")
+(defun company-wordfreq--default-path ()
+  "Set up the default for company-wordfreq-path."
+  (concat (file-name-as-directory user-emacs-directory) "wordfreq-dicts"))
+
+(defcustom company-wordfreq-path (company-wordfreq--default-path)
   "Path where the dictionary files reside.
 
 The dictionary files are expected to have the name <language>.txt
