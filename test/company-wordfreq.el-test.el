@@ -87,4 +87,164 @@
   (let ((user-emacs-directory "/home/user/.emacs.d"))
     (should (equal (company-wordfreq--default-path) "/home/user/.emacs.d/wordfreq-dicts"))))
 
+(ert-deftest test-language-proposal-list ()
+  (let ((company-wordfreq--language-alist '(("eo" "esperanto")
+					    ("en" "english"))))
+    (should (equal (company-wordfreq--proposal-list) '("esperanto" "english")))))
+
+(ert-deftest test-language-iso-code-list ()
+  (let ((company-wordfreq--language-alist '(("eo" "esperanto")
+					    ("en" "english"))))
+    (should (equal (company-wordfreq--iso-code "esperanto") "eo"))))
+
+(ert-deftest test-make-url-full ()
+  (should (equal (company-wordfreq--dict-url "eo" "full")
+		 "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/eo/eo_full.txt")))
+
+(ert-deftest test-make-url-50k ()
+  (should (equal (company-wordfreq--dict-url "eo" "50k")
+		 "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/eo/eo_50k.txt")))
+
+(defun return-code (code)
+  (let ((buffer (generate-new-buffer "urltmp")))
+    (with-current-buffer buffer
+      (insert (concat "HTTP/1.1 " code "\nother headers")))
+    buffer))
+
+(ert-deftest test-probe-50k-word-list-true ()
+  (mocker-let
+      ((url-retrieve-synchronously (url)
+				   ((:input
+				     '("http://example.com/eo_50k.txt")
+				     :output-generator
+				     (lambda (_url) (return-code "200 OK")))))
+       (company-wordfreq--dict-url (lang-code kind)
+				   ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt"))))
+    (should (company-wordfreq--probe-50k "eo"))))
+
+(ert-deftest test-probe-50k-word-list-false ()
+  (mocker-let
+      ((url-retrieve-synchronously (url)
+				   ((:input
+				     '("http://example.com/eo_50k.txt")
+				     :output-generator
+				     (lambda (_url) (return-code "404 Not Found")))))
+       (company-wordfreq--dict-url (lang-code kind)
+				   ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt"))))
+    (should-not (company-wordfreq--probe-50k "eo"))))
+
+(ert-deftest test-drop-frequency-values ()
+  (with-temp-buffer
+    (insert "mi 16311
+vi 13927
+ne 11163
+estas 10726
+")
+    (company-wordfreq--drop-frequency-values)
+    (should (equal (buffer-string) "mi\nvi\nne\nestas\n"))))
+
+(ert-deftest test-fetch-short ()
+  (mocker-let ((y-or-n-p (str) ((:input '("Use reduced length 50k words? ")))))
+    (company-wordfreq--prompt-fetch-short)))
+
+(ert-deftest test-download-new-word-list-no50k ()
+  (let ((company-wordfreq--word-list-buffer nil))
+    (mocker-let ((company-wordfreq--proposal-list () ((:output '("esperanto" "english"))))
+		(completing-read (prompt choices)
+				 ((:input
+				   '("Choose language: " ("esperanto" "english"))
+				   :output "esperanto")))
+		(company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
+		(company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output nil)))
+		(company-wordfreq--prompt-fetch-short () ((:occur 0)))
+		(company-wordfreq--dict-url (lang-code kind)
+					    ((:input '("eo" "full") :output "http://example.com/eo_full.txt")))
+		(url-retrieve (url callback language)
+			      ((:input
+				'("http://example.com/eo_full.txt"
+				  company-wordfreq--list-retrieved-callback
+				  ("esperanto"))
+				:output 'buffer))))
+     (company-wordfreq-download-list)
+     (should (eq company-wordfreq--word-list-buffer 'buffer)))))
+
+(ert-deftest test-download-new-word-list-50k-no ()
+  (let ((company-wordfreq--word-list-buffer nil))
+    (mocker-let ((company-wordfreq--proposal-list () ((:output '("esperanto" "english"))))
+		(completing-read (prompt choices)
+				 ((:input
+				   '("Choose language: " ("esperanto" "english"))
+				   :output "esperanto")))
+		(company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
+		(company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output t)))
+		(company-wordfreq--prompt-fetch-short () ((:output nil)))
+		(company-wordfreq--dict-url (lang-code kind)
+					    ((:input '("eo" "full") :output "http://example.com/eo_full.txt")))
+		(url-retrieve (url callback language)
+			      ((:input
+				'("http://example.com/eo_full.txt"
+				  company-wordfreq--list-retrieved-callback
+				  ("esperanto"))
+				:output 'buffer))))
+     (company-wordfreq-download-list)
+     (should (eq company-wordfreq--word-list-buffer 'buffer)))))
+
+(ert-deftest test-download-new-word-list-50k-yes ()
+  (let ((company-wordfreq--word-list-buffer nil))
+    (mocker-let ((company-wordfreq--proposal-list () ((:output '("esperanto" "english"))))
+		(completing-read (prompt choices)
+				 ((:input
+				   '("Choose language: " ("esperanto" "english"))
+				   :output "esperanto")))
+		(company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
+		(company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output t)))
+		(company-wordfreq--prompt-fetch-short () ((:output t)))
+		(company-wordfreq--dict-url (lang-code kind)
+					    ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt")))
+		(url-retrieve (url callback language)
+			      ((:input '("http://example.com/eo_50k.txt"
+					 company-wordfreq--list-retrieved-callback
+					 ("esperanto"))
+				       :output 'buffer))))
+     (company-wordfreq-download-list)
+     (should (eq company-wordfreq--word-list-buffer 'buffer)))))
+
+(ert-deftest test-drop-http-response-header ()
+  (with-temp-buffer
+    (insert "HTTP/1.1 200 OK
+other headers
+
+mi 16311
+vi 13927
+ne 11163
+estas 10726
+")
+    (company-wordfreq--drop-http-response-header)
+    (should (equal (buffer-string) "mi 16311\nvi 13927\nne 11163\nestas 10726\n"))))
+
+(ert-deftest test-list-retrieved-callback-success ()
+  (let ((company-wordfreq--word-list-buffer (generate-new-buffer "word-list-test-buffer"))
+	(company-wordfreq-path (concat (file-name-directory (temporary-file-directory))
+				       (make-temp-name ".emacs.d"))))
+    (with-current-buffer company-wordfreq--word-list-buffer
+      (insert "HTTP/1.1 200 OK
+other headers
+
+mi 16311
+vi 13927
+ne 11163
+estas 10726
+"))
+    (company-wordfreq--list-retrieved-callback '(:peer 'foo) "esperanto")
+    (should (equal (with-temp-buffer
+		     (insert-file-contents (concat (file-name-as-directory company-wordfreq-path)
+						   "esperanto.txt"))
+		     (buffer-string)) "mi\nvi\nne\nestas\n"))
+    (should-error (switch-to-buffer company-wordfreq--word-list-buffer))))
+
+(ert-deftest test-list-retrieved-callback-error ()
+  (mocker-let ((company-wordfreq--drop-frequency-values () ((:occur 0))))
+    (should-error (company-wordfreq--list-retrieved-callback '(:error 'foo) '("esperanto")))))
+
+
 ;;; company-wordfreq.el-test.el ends here

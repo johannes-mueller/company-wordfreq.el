@@ -17,13 +17,10 @@ frequency.
 
 ** Word list files
 
-=company-wordfreq= does not come with the word list files, so you have to
-provide them yourself.  A good source for many languages is [[https://github.com/hermitdave/FrequencyWords][FrequencyWords]]. In
-the files that are provided in that repo the words come with a frequency value.
-You have to clean those out, for example by
-#+BEGIN_EXAMPLE
-    $ sed -i 's/ [0-9].*$//' <filename>
-#+END_EXAMPLE
+=company-wordfreq= does not come with the word list files directly, but it can
+download the files for you for many languages from [[https://github.com/hermitdave/FrequencyWords][FrequencyWords]].  I made a
+fork of this repo to make sure, that the original does not change all over
+sudden without my noticing.
 
 The directory where the word list files reside is determined by the variable
 ==company-word-freq-path==, default =wordfreq-dicts= in your emacs home
@@ -38,8 +35,8 @@ grep into the word list files.
 
 ** Installation
 
-Hopefully from MELPA one day. As long as it is not, it is probably easiest to use
-[[https://github.com/raxod502/straight.el][straight.el]]. Put the following lines into your init file.
+Hopefully from MELPA one day.  As long as it is not, it is probably easiest to use
+[[https://github.com/raxod502/straight.el][straight.el]].  Put the following lines into your init file.
 
 #+BEGIN_EXAMPLE emacs-lisp
 (straight-use-package
@@ -59,8 +56,21 @@ buffer locally in =text-mode= buffers by
                             (setq-local company-transformers nil)))
 #+END_EXAMPLE
 
+To download a word list use
+
+#+BEGIN_EXAMPLE emacs-lisp
+M-x company-wordfreq-download-list
+#+END_EXAMPLE
+
+You are presented a list of languages to choose. For some languages the word
+lists are huge, which can lead to noticeable latency when the completions are
+build.  Therefore you are asked if you want to use a word list with only the
+50k most frequent words.
+
+The file will then be downloaded, processed and put in place.
+
 ** Status
 
-This is basically the result of a Saturday afternoon hack.  So probably not
+This is basically the result of a week-end hack.  So probably not
 everything will work under any circumstances.  Bug reports and feedback welcome
 in the issue tracker.  Pull requests also, of course.

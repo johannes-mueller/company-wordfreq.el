@@ -111,5 +111,134 @@ frequency."
 		      (completion-ignore-case t))
 		  (all-completions arg (delete-dups candidates))))))
 
+(defvar company-wordfreq--word-list-buffer nil)
+
+(defun company-wordfreq-download-list ()
+  (interactive)
+  (let* ((language (completing-read "Choose language: " (company-wordfreq--proposal-list)))
+	 (lang-code (company-wordfreq--iso-code language))
+	 (kind-str (if (and (company-wordfreq--probe-50k lang-code)
+			    (company-wordfreq--prompt-fetch-short)) "50k" "full")))
+    (setq company-wordfreq--word-list-buffer
+	  (url-retrieve (company-wordfreq--dict-url lang-code kind-str)
+			'company-wordfreq--list-retrieved-callback
+			`(,language)))))
+
+(defun company-wordfreq--proposal-list ()
+  "Get the friendly names of the languages."
+  (mapcar (lambda (elt) (car (cdr elt))) company-wordfreq--language-alist))
+
+(defun company-wordfreq--iso-code (language)
+  "Get the iso code of LANGUAGE"
+  (car (seq-find (lambda (elt) (equal (car (cdr elt)) language))
+		 company-wordfreq--language-alist)))
+
+(defconst company-wordfreq--frequency-word-url-prefix
+  "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/")
+
+(defun company-wordfreq--dict-url (lang-code kind)
+    (concat company-wordfreq--frequency-word-url-prefix
+	    lang-code "/"
+	    lang-code "_"
+	    kind ".txt"))
+
+(defun company-wordfreq--probe-50k (lang-code)
+  (let ((url-request-method "HEAD"))
+    (switch-to-buffer (url-retrieve-synchronously
+		       (company-wordfreq--dict-url lang-code "50k")))
+    (goto-char (point-min))
+    (let ((status-code
+	   (nth 1 (split-string (car (split-string (buffer-string) "\n")) " "))))
+      (kill-current-buffer)
+      (not (equal status-code "404")))))
+
+(defun company-wordfreq--drop-http-response-header ()
+  (goto-char (point-min))
+  (re-search-forward "^$")
+  (forward-char)
+  (delete-region (point-min) (point)))
+
+(defun company-wordfreq--drop-frequency-values ()
+  (goto-char (point-min))
+  (while (re-search-forward "\s[0-9]+$" nil t)
+    (replace-match "" nil nil)))
+
+(defun company-wordfreq--prompt-fetch-short ()
+  (y-or-n-p "Use reduced length 50k words? "))
+
+(defun company-wordfreq--list-retrieved-callback (response language)
+  (when (eq (car response) :error)
+    (error "Fetching the word list failed, sorry.
+Either a problem with your net connection or something has changed with the word lis source.
+Consider filing an issue"))
+  (with-current-buffer company-wordfreq--word-list-buffer
+    (company-wordfreq--drop-http-response-header)
+    (company-wordfreq--drop-frequency-values)
+    (unless (file-directory-p company-wordfreq-path)
+      (make-directory company-wordfreq-path))
+    (write-file (concat (file-name-as-directory company-wordfreq-path)
+			language ".txt"))
+    (kill-buffer)))
+
+(defconst company-wordfreq--language-alist
+  '(("af" "afrikaans")
+    ("ar" "arabic")
+    ("bg" "bulgarian")
+    ("bn" "bengali")
+    ("br" "breton")
+    ("bs" "bosnian")
+    ("ca" "catalan")
+    ("cs" "czech")
+    ("da" "danish")
+    ("de" "german")
+    ("el" "greek")
+    ("en" "english")
+    ("eo" "esperanto")
+    ("es" "spanish")
+    ("et" "estonian")
+    ("eu" "basque")
+    ("fa" "persian")
+    ("fi" "finnish")
+    ("fr" "french")
+    ("gl" "galician")
+    ("he" "hebrew")
+    ("hi" "hindi")
+    ("hr" "croatian")
+    ("hu" "hungarian")
+    ("hy" "armenian")
+    ("id" "indonesian")
+    ("is" "icelandic")
+    ("it" "italian")
+    ("ja" "japanese")
+    ("ka" "georgian")
+    ("kk" "kazakh")
+    ("ko" "korean")
+    ("lt" "lithuanian")
+    ("lv" "latvian")
+    ("mk" "macedonian")
+    ("ml" "malayalam")
+    ("ms" "malay")
+    ("nl" "dutch")
+    ("no" "norwegian")
+    ("pl" "polish")
+    ("pt" "portuguese")
+    ("pt_br" "brasileiro")
+    ("ro" "romanian")
+    ("ru" "russian")
+    ("si" "sinhala")
+    ("sk" "slovak")
+    ("sl" "slovenian")
+    ("sq" "albanian")
+    ("sr" "serbian")
+    ("sv" "swedish")
+    ("ta" "tamil")
+    ("te" "telugu")
+    ("th" "thai")
+    ("tl" "tagalog")
+    ("tr" "turkish")
+    ("uk" "ukrainian")
+    ("ur" "urdu")
+    ("vi" "vietnamese")))
+
 (provide 'company-wordfreq)
 ;;; company-wordfreq.el ends here
