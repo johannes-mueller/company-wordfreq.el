@@ -89,6 +89,7 @@ A warning is issued if it can't be found on loading."
 					  " -i -N ^" prefix " " (company-wordfreq--dictionary)))
 		"\n"))
 
+;;;###autoload
 (defun company-wordfreq (command &optional arg &rest ignored)
   "A company backup intended for writing texts in a human language.
 
@@ -113,6 +114,7 @@ frequency."
 
 (defvar company-wordfreq--word-list-buffer nil)
 
+;;;###autoload
 (defun company-wordfreq-download-list ()
   (interactive)
   (let* ((language (completing-read "Choose language: " (company-wordfreq--proposal-list)))
