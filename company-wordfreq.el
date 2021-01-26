@@ -180,7 +180,8 @@ Consider filing an issue"))
       (make-directory company-wordfreq-path))
     (write-file (concat (file-name-as-directory company-wordfreq-path)
 			language ".txt"))
-    (kill-buffer)))
+    (kill-buffer)
+    (setq company-wordfreq--word-list-buffer nil)))
 
 (defconst company-wordfreq--language-alist
   '(("af" "afrikaans")

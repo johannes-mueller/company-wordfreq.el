@@ -225,7 +225,8 @@ estas 10726
 (ert-deftest test-list-retrieved-callback-success ()
   (let ((company-wordfreq--word-list-buffer (generate-new-buffer "word-list-test-buffer"))
 	(company-wordfreq-path (concat (file-name-directory (temporary-file-directory))
-				       (make-temp-name ".emacs.d"))))
+				       (make-temp-name ".emacs.d")))
+	(buffer-tmp nil))
     (with-current-buffer company-wordfreq--word-list-buffer
       (insert "HTTP/1.1 200 OK
 other headers
@@ -235,12 +236,14 @@ vi 13927
 ne 11163
 estas 10726
 "))
+    (setq buffer-tmp company-wordfreq--word-list-buffer)
     (company-wordfreq--list-retrieved-callback '(:peer 'foo) "esperanto")
     (should (equal (with-temp-buffer
 		     (insert-file-contents (concat (file-name-as-directory company-wordfreq-path)
 						   "esperanto.txt"))
 		     (buffer-string)) "mi\nvi\nne\nestas\n"))
-    (should-error (switch-to-buffer company-wordfreq--word-list-buffer))))
+    (should-error (switch-to-buffer buffer-tmp))
+    (should (eq company-wordfreq--word-list-buffer nil))))
 
 (ert-deftest test-list-retrieved-callback-error ()
   (mocker-let ((company-wordfreq--drop-frequency-values () ((:occur 0))))
