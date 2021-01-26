@@ -27,13 +27,11 @@
 ;; words already used in the buffer followed by matching words of the language
 ;; ordered by frequency.
 ;;
-;; `company-wordfreq' does not come with the word list files, so you have to
-;; provide them yourself.  A good source for many languages is
-;; <https://github.com/hermitdave/FrequencyWords>.  In the files that are
-;; provided in this repo the words come with a frequency value.  You have to
-;; clean those out, for example by
-;;
-;; $ sed -i 's/ [0-9].*$//' <filename>
+;; `company-wordfreq' does not come with the word list files directly, but it
+;; can download the files for you for many languages from
+;; <https://github.com/hermitdave/FrequencyWords>.  I made a fork of this repo
+;; to make sure, that the original does not change all over sudden without my
+;; noticing.
 ;;
 ;; The directory where the word list files reside is determined by the variable
 ;; `=company-word-freq-path=', default `~/.emacs.d/wordfreq-dicts'.  Their
@@ -51,6 +49,16 @@
 ;;     (add-hook 'text-mode-hook (lambda ()
 ;;                              (setq-local company-backends '(company-wordfreq))
 ;;                              (setq-local company-transformers nil)))
+;;
+;; To download a word list use
+;;
+;;     M-x company-wordfreq-download-list
+;;
+;; You are presented a list of languages to choose.  For some languages the
+;; word lists are huge, which can lead to noticeable latency when the
+;; completions are build.  Therefore you are asked if you want to use a word
+;; list with only the 50k most frequent words.  The file will then be
+;; downloaded, processed and put in place.
 
 ;;; Code:
 
@@ -112,10 +120,19 @@ frequency."
 		      (completion-ignore-case t))
 		  (all-completions arg (delete-dups candidates))))))
 
-(defvar company-wordfreq--word-list-buffer nil)
+(defvar company-wordfreq--word-list-buffer nil
+  "Pointer to the buffer a word list has been downloaded to.")
 
 ;;;###autoload
 (defun company-wordfreq-download-list ()
+  "Download a wordlist from FrequenWords and process it for use.
+
+The langauge can be chosen from a completion list. If the full
+wordlist for the chosen language is so big, that there is a
+shorter version of 50k words available, you will be prompted to
+choose the short version.  Probably it is a good idea to choose
+the short version as the full versions can be quite huge and
+introduce latency to the completion proposals."
   (interactive)
   (let* ((language (completing-read "Choose language: " (company-wordfreq--proposal-list)))
 	 (lang-code (company-wordfreq--iso-code language))
@@ -139,12 +156,15 @@ frequency."
   "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/")
 
 (defun company-wordfreq--dict-url (lang-code kind)
+  "Setup the file path for the language LANGUAGE-CODE.
+KIND is either \"full\" or \"50k\"."
     (concat company-wordfreq--frequency-word-url-prefix
 	    lang-code "/"
 	    lang-code "_"
 	    kind ".txt"))
 
 (defun company-wordfreq--probe-50k (lang-code)
+  "Test if a 50k version for language LANGUAGE-CODE is available."
   (let ((url-request-method "HEAD"))
     (switch-to-buffer (url-retrieve-synchronously
 		       (company-wordfreq--dict-url lang-code "50k")))
@@ -155,12 +175,15 @@ frequency."
       (not (equal status-code "404")))))
 
 (defun company-wordfreq--drop-http-response-header ()
+  "Delete the http response heade of the buffer the word list has
+been downloaded to."
   (goto-char (point-min))
   (re-search-forward "^$")
   (forward-char)
   (delete-region (point-min) (point)))
 
 (defun company-wordfreq--drop-frequency-values ()
+  "Delete the frequency valuee after each word in the word list."
   (goto-char (point-min))
   (while (re-search-forward "\s[0-9]+$" nil t)
     (replace-match "" nil nil)))
@@ -169,6 +192,7 @@ frequency."
   (y-or-n-p "Use reduced length 50k words? "))
 
 (defun company-wordfreq--list-retrieved-callback (response language)
+  "Process the downloaded word list and save it to the appropriate place."
   (when (eq (car response) :error)
     (error "Fetching the word list failed, sorry.
 Either a problem with your net connection or something has changed with the word lis source.
