@@ -23,7 +23,7 @@ fork of this repo to make sure, that the original does not change all over
 sudden without my noticing.
 
 The directory where the word list files reside is determined by the variable
-==company-word-freq-path==, default =wordfreq-dicts= in your emacs home
+=company-word-freq-path=, default =wordfreq-dicts= in your emacs home
 directory, usually like =~/.emacs.d/wordfreq-dicts=.  Their names must follow
 the pattern =<language>.txt= where language is the =ispell-local-dictionary=
 value of the current language.

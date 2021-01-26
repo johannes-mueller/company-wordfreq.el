@@ -34,7 +34,7 @@
 ;; noticing.
 ;;
 ;; The directory where the word list files reside is determined by the variable
-;; `=company-word-freq-path=', default `~/.emacs.d/wordfreq-dicts'.  Their
+;; `company-word-freq-path', default `~/.emacs.d/wordfreq-dicts'.  Their
 ;; names must follow the pattern `<language>.txt' where language is the
 ;; `ispell-local-dictionary' value of the current language.
 ;;
