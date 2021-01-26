@@ -56,6 +56,10 @@ buffer locally in =text-mode= buffers by
                             (setq-local company-transformers nil)))
 #+END_EXAMPLE
 
+Usually you don't need to configure the language picked to get the word
+completions. =company-wordfreq= uses the variable =ispell-local-dictionary=.
+It should work dynamically even if you use =auto-dictionary-mode=.
+
 To download a word list use
 
 #+BEGIN_EXAMPLE emacs-lisp

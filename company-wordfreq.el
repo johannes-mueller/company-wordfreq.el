@@ -50,6 +50,12 @@
 ;;                              (setq-local company-backends '(company-wordfreq))
 ;;                              (setq-local company-transformers nil)))
 ;;
+;; Usually you don't need to configure the language picked to get the word
+;; completions. `company-wordfreq' uses the variable
+;; `ispell-local-dictionary'.  It should work dynamically even if you use
+;; `auto-dictionary-mode'.
+;;
+;;
 ;; To download a word list use
 ;;
 ;;     M-x company-wordfreq-download-list
