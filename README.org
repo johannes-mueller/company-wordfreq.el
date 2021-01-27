@@ -15,6 +15,19 @@ words are used in the language.  So the first completions are words already
 used in the buffer followed by matching words of the language ordered by
 frequency.
 
+*** Why not =company-ispell=?
+=company-ispell= presents you the candidates in the alphabetical sequence, then
+maybe sorted by a company transformer such as =company-prescient=. That way it
+often happens that the word you are about to type appears somewhere in eighth
+place and it is actually easier to type the word manually.
+
+=company-wordfreq= however uses word lists in which the words are ordered
+according to their frequency in the language. That way the probability that the
+word you want to type is among the first is higher.
+
+The package is still somewhat in an experimental stage. There might be ways to
+even more optimize the behavior.
+
 ** Word list files
 
 =company-wordfreq= does not come with the word list files directly, but it can
