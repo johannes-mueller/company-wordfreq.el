@@ -19,7 +19,7 @@
 
 ;;; Commentary:
 
-;; `company-wordfreq' is a company backup intended for writing texts in a human
+;; `company-wordfreq' is a company backend intended for writing texts in a human
 ;; language.  The completions it proposes are words already used in the current
 ;; (or another open) buffer and matching words from a word list file.  This
 ;; word list file is supposed to be a simple list of words ordered by the
@@ -105,7 +105,7 @@ A warning is issued if it can't be found on loading."
 
 ;;;###autoload
 (defun company-wordfreq (command &optional arg &rest ignored)
-  "A company backup intended for writing texts in a human language.
+  "A company backend intended for writing texts in a human language.
 
 The completions it proposes are words already used in the
 current (or another open) buffer and matching words from a word
