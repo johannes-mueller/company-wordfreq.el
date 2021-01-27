@@ -147,7 +147,8 @@ introduce latency to the completion proposals."
     (setq company-wordfreq--word-list-buffer
 	  (url-retrieve (company-wordfreq--dict-url lang-code kind-str)
 			'company-wordfreq--list-retrieved-callback
-			`(,language)))))
+			`(,language)
+			:inhibit-cookies))))
 
 (defun company-wordfreq--proposal-list ()
   "Get the friendly names of the languages."
@@ -172,13 +173,14 @@ KIND is either \"full\" or \"50k\"."
 (defun company-wordfreq--probe-50k (lang-code)
   "Test if a 50k version for language LANGUAGE-CODE is available."
   (let ((url-request-method "HEAD"))
-    (switch-to-buffer (url-retrieve-synchronously
-		       (company-wordfreq--dict-url lang-code "50k")))
-    (goto-char (point-min))
-    (let ((status-code
-	   (nth 1 (split-string (car (split-string (buffer-string) "\n")) " "))))
-      (kill-current-buffer)
-      (not (equal status-code "404")))))
+    (with-current-buffer (url-retrieve-synchronously
+			  (company-wordfreq--dict-url lang-code "50k")
+			  :inhibit-cookies)
+      (goto-char (point-min))
+      (let ((status-code
+	     (nth 1 (split-string (car (split-string (buffer-string) "\n")) " "))))
+	(kill-current-buffer)
+	(not (equal status-code "404"))))))
 
 (defun company-wordfreq--drop-http-response-header ()
   "Delete the http response heade of the buffer the word list has
@@ -210,7 +212,7 @@ Consider filing an issue"))
       (make-directory company-wordfreq-path))
     (write-file (concat (file-name-as-directory company-wordfreq-path)
 			language ".txt"))
-    (kill-buffer)
+    (kill-current-buffer)
     (setq company-wordfreq--word-list-buffer nil)))
 
 (defconst company-wordfreq--language-alist

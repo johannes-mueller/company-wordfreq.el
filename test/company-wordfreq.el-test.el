@@ -113,22 +113,20 @@
 
 (ert-deftest test-probe-50k-word-list-true ()
   (mocker-let
-      ((url-retrieve-synchronously (url)
+      ((url-retrieve-synchronously (url inhibit-cookies)
 				   ((:input
-				     '("http://example.com/eo_50k.txt")
-				     :output-generator
-				     (lambda (_url) (return-code "200 OK")))))
+				     '("http://example.com/eo_50k.txt" :inhibit-cookies)
+				     :output (return-code "200 OK"))))
        (company-wordfreq--dict-url (lang-code kind)
 				   ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt"))))
     (should (company-wordfreq--probe-50k "eo"))))
 
 (ert-deftest test-probe-50k-word-list-false ()
   (mocker-let
-      ((url-retrieve-synchronously (url)
+      ((url-retrieve-synchronously (url inhibit-cookies)
 				   ((:input
-				     '("http://example.com/eo_50k.txt")
-				     :output-generator
-				     (lambda (_url) (return-code "404 Not Found")))))
+				     '("http://example.com/eo_50k.txt" :inhibit-cookies)
+				     :output (return-code "404 Not Found"))))
        (company-wordfreq--dict-url (lang-code kind)
 				   ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt"))))
     (should-not (company-wordfreq--probe-50k "eo"))))
@@ -159,11 +157,12 @@ estas 10726
 		(company-wordfreq--prompt-fetch-short () ((:occur 0)))
 		(company-wordfreq--dict-url (lang-code kind)
 					    ((:input '("eo" "full") :output "http://example.com/eo_full.txt")))
-		(url-retrieve (url callback language)
+		(url-retrieve (url callback language inhibit-cookies)
 			      ((:input
 				'("http://example.com/eo_full.txt"
 				  company-wordfreq--list-retrieved-callback
-				  ("esperanto"))
+				  ("esperanto")
+				  :inhibit-cookies)
 				:output 'buffer))))
      (company-wordfreq-download-list)
      (should (eq company-wordfreq--word-list-buffer 'buffer)))))
@@ -180,11 +179,12 @@ estas 10726
 		(company-wordfreq--prompt-fetch-short () ((:output nil)))
 		(company-wordfreq--dict-url (lang-code kind)
 					    ((:input '("eo" "full") :output "http://example.com/eo_full.txt")))
-		(url-retrieve (url callback language)
+		(url-retrieve (url callback language inhibit-cookies)
 			      ((:input
 				'("http://example.com/eo_full.txt"
 				  company-wordfreq--list-retrieved-callback
-				  ("esperanto"))
+				  ("esperanto")
+				  :inhibit-cookies)
 				:output 'buffer))))
      (company-wordfreq-download-list)
      (should (eq company-wordfreq--word-list-buffer 'buffer)))))
@@ -201,10 +201,11 @@ estas 10726
 		(company-wordfreq--prompt-fetch-short () ((:output t)))
 		(company-wordfreq--dict-url (lang-code kind)
 					    ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt")))
-		(url-retrieve (url callback language)
+		(url-retrieve (url callback language inhibit-cookies)
 			      ((:input '("http://example.com/eo_50k.txt"
 					 company-wordfreq--list-retrieved-callback
-					 ("esperanto"))
+					 ("esperanto")
+					 :inhibit-cookies)
 				       :output 'buffer))))
      (company-wordfreq-download-list)
      (should (eq company-wordfreq--word-list-buffer 'buffer)))))
