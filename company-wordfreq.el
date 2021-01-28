@@ -100,7 +100,7 @@ A warning is issued if it can't be found on loading."
   "Fetches the candidates."
   (split-string (shell-command-to-string (concat
 					  (executable-find "rg")
-					  " -i -N "
+					  " -i "
 					  (shell-quote-argument (concat "^" prefix))
 					  " " (company-wordfreq--dictionary)))
 		"\n"))
