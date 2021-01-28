@@ -9,42 +9,57 @@
 (require 'mocker)
 (require 'company-wordfreq)
 
-(ert-deftest test-rg-candidates-foo ()
-  (mocker-let ((executable-find (executable) ((:input '("rg") :output "/path/to/rg")))
-	       (shell-command-to-string (command)
-					((:input
-					  '("/path/to/rg -i \\^foo /path/to/dict.txt")
-					  :output "foobar\nfoobaz\nfoo")))
-	       (company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
-      (should (equal (company-wordfreq--candidates "foo") '("foobar" "foobaz" "foo")))))
+(ert-deftest test-candidates-foo ()
+  (let ((company-wordfreq--grep-executable "/path/to/grep-program"))
+    (mocker-let ((shell-command-to-string (command)
+					  ((:input
+					    '("/path/to/grep-program -i \\^foo /path/to/dict.txt")
+					   :output "foobar\nfoobaz\nfoo")))
+		(company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
+     (should (equal (company-wordfreq--candidates "foo") '("foobar" "foobaz" "foo"))))))
 
-(ert-deftest test-rg-candidates-foo-case-sensitive ()
-  (mocker-let ((executable-find (executable) ((:input '("rg") :output "/path/to/rg")))
-	       (shell-command-to-string (command)
-					((:input
-					  '("/path/to/rg -i \\^Foo /path/to/dict.txt")
-					  :output "foobar\nfoobaz\nfoo")))
-	       (company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
-      (should (equal (company-wordfreq--candidates "Foo") '("foobar" "foobaz" "foo")))))
+(ert-deftest test-candidates-foo-case-sensitive ()
+  (let ((company-wordfreq--grep-executable "/path/to/grep-program"))
+    (mocker-let ((shell-command-to-string (command)
+					  ((:input
+					    '("/path/to/grep-program -i \\^Foo /path/to/dict.txt")
+					   :output "foobar\nfoobaz\nfoo")))
+		(company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
+     (should (equal (company-wordfreq--candidates "Foo") '("foobar" "foobaz" "foo"))))))
 
-(ert-deftest test-rg-candidates-bar ()
-  (mocker-let ((executable-find (executable) ((:input '("rg") :output "/other/path/to/rg")))
-	       (shell-command-to-string (command)
-					((:input
-					  '("/other/path/to/rg -i \\^bar /other/path/to/dict.txt")
-					  :output "barbar\nbarbaz\nbar")))
-	       (company-wordfreq--dictionary () ((:output "/other/path/to/dict.txt"))))
-      (should (equal (company-wordfreq--candidates "bar") '("barbar" "barbaz" "bar")))))
+(ert-deftest test-candidates-bar ()
+  (let ((company-wordfreq--grep-executable "/other/path/to/grep-program"))
+    (mocker-let ((shell-command-to-string (command)
+					  ((:input
+					    '("/other/path/to/grep-program -i \\^bar /other/path/to/dict.txt")
+					    :output "barbar\nbarbaz\nbar")))
+		(company-wordfreq--dictionary () ((:output "/other/path/to/dict.txt"))))
+     (should (equal (company-wordfreq--candidates "bar") '("barbar" "barbaz" "bar"))))))
 
-(ert-deftest test-rg-dict-path-esperanto ()
+(ert-deftest test-dict-path-esperanto ()
   (let ((ispell-local-dictionary "esperanto")
 	(company-wordfreq-path "/path/to/dicts"))
     (should (equal (company-wordfreq--dictionary) "/path/to/dicts/esperanto.txt"))))
 
-(ert-deftest test-rg-dict-path-english ()
+(ert-deftest test-dict-path-english ()
   (let ((ispell-local-dictionary "english")
 	(company-wordfreq-path "/other/path/to/dicts"))
     (should (equal (company-wordfreq--dictionary) "/other/path/to/dicts/english.txt"))))
+
+(ert-deftest test-find-grep-program ()
+  (let ((company-wordfreq--grep-executable nil))
+    (mocker-let ((executable-find (program) ((:input '("grep") :output "/usr/bin/grep"))))
+     (company-wordfreq--find-grep-program)
+     (should (equal company-wordfreq--grep-executable "/usr/bin/grep")))))
+
+(ert-deftest test-find-grep-program-not-avail ()
+  (let ((company-wordfreq--grep-executable nil))
+    (mocker-let ((executable-find (program) ((:input '("grep") :output nil))))
+      (should-error (company-wordfreq--find-grep-program)))))
+
+(ert-deftest test-backend-init ()
+  (mocker-let ((company-wordfreq--find-grep-program () ((:occur 1))))
+    (company-wordfreq 'init)))
 
 (ert-deftest test-backend-prefix-foo ()
   (mocker-let ((company-grab-word () ((:output "foo"))))

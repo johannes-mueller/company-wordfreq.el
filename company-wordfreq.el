@@ -38,8 +38,9 @@
 ;; names must follow the pattern `<language>.txt' where language is the
 ;; `ispell-local-dictionary' value of the current language.
 ;;
-;; You need `rg' alias ripgrep in your `$PATH' as `company-wordfreq' uses it to
-;; grep into the word list files.
+;; You need =grep= in your =$PATH= as =company-wordfreq= uses it to grep into
+;; the word list files.  Should be the case by default on any UNIX like
+;; systems.  On windows you might have to tweak it somehow.
 ;;
 ;; `company-wordfreq' is supposed to be the one and only company backend and
 ;; `company-mode' should not transform or sort its candidates.  This can be
@@ -51,7 +52,7 @@
 ;;                              (setq-local company-transformers nil)))
 ;;
 ;; Usually you don't need to configure the language picked to get the word
-;; completions. `company-wordfreq' uses the variable
+;; completions.  `company-wordfreq' uses the variable
 ;; `ispell-local-dictionary'.  It should work dynamically even if you use
 ;; `auto-dictionary-mode'.
 ;;
@@ -84,13 +85,14 @@ the current buffer."
   :type 'string
   :group 'company)
 
-(defconst company-wordfreq--rg-executable
-  "The PATH of the `rg' executable.
+(defvar company-wordfreq--grep-executable nil
+  "The PATH of the `rg' executable determined by backend init.")
 
-A warning is issued if it can't be found on loading."
-  (if-let ((executable (executable-find "rg")))
-      executable
-    (warn "No rg executable found in PATH.")))
+(defun company-wordfreq--find-grep-program ()
+  "Find the grep executable."
+  (setq company-wordfreq--grep-executable
+	(or (executable-find "grep")
+	    (error "No executable for grep found. company-wordfreq will not work."))))
 
 (defun company-wordfreq--dictionary ()
   "Determine the path of the word list file."
@@ -98,12 +100,13 @@ A warning is issued if it can't be found on loading."
 
 (defun company-wordfreq--candidates (prefix)
   "Fetches the candidates."
-  (split-string (shell-command-to-string (concat
-					  (executable-find "rg")
-					  " -i "
-					  (shell-quote-argument (concat "^" prefix))
-					  " " (company-wordfreq--dictionary)))
-		"\n"))
+  (split-string
+   (shell-command-to-string (concat
+			     company-wordfreq--grep-executable
+			     " -i "
+			     (shell-quote-argument (concat "^" prefix))
+			     " " (company-wordfreq--dictionary)))
+   "\n"))
 
 ;;;###autoload
 (defun company-wordfreq (command &optional arg &rest ignored)
@@ -118,6 +121,7 @@ buffer followed by matching words of the language ordered by
 frequency."
   (interactive (list 'interactive))
   (cl-case command
+    (init (company-wordfreq--find-grep-program))
     (prefix (when-let ((prefix (company-grab-word)))
 	      (substring-no-properties prefix)))
     (sorted t)

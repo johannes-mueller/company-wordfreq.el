@@ -43,8 +43,9 @@ value of the current language.
 
 ** Further requirements
 
-You need =rg= alias ripgrep in your =$PATH= as =company-wordfreq= uses it to
-grep into the word list files.
+You need =grep= in your =$PATH= as =company-wordfreq= uses it to grep into the
+word list files.  Should be the case by default on any UNIX like systems.  On
+Windows you might have to tweak it somehow.
 
 ** Installation
 
