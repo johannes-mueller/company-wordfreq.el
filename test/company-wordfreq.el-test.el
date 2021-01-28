@@ -13,7 +13,7 @@
   (mocker-let ((executable-find (executable) ((:input '("rg") :output "/path/to/rg")))
 	       (shell-command-to-string (command)
 					((:input
-					  '("/path/to/rg -i -N ^foo /path/to/dict.txt")
+					  '("/path/to/rg -i -N \\^foo /path/to/dict.txt")
 					  :output "foobar\nfoobaz\nfoo")))
 	       (company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
       (should (equal (company-wordfreq--candidates "foo") '("foobar" "foobaz" "foo")))))
@@ -22,7 +22,7 @@
   (mocker-let ((executable-find (executable) ((:input '("rg") :output "/path/to/rg")))
 	       (shell-command-to-string (command)
 					((:input
-					  '("/path/to/rg -i -N ^Foo /path/to/dict.txt")
+					  '("/path/to/rg -i -N \\^Foo /path/to/dict.txt")
 					  :output "foobar\nfoobaz\nfoo")))
 	       (company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
       (should (equal (company-wordfreq--candidates "Foo") '("foobar" "foobaz" "foo")))))
@@ -31,7 +31,7 @@
   (mocker-let ((executable-find (executable) ((:input '("rg") :output "/other/path/to/rg")))
 	       (shell-command-to-string (command)
 					((:input
-					  '("/other/path/to/rg -i -N ^bar /other/path/to/dict.txt")
+					  '("/other/path/to/rg -i -N \\^bar /other/path/to/dict.txt")
 					  :output "barbar\nbarbaz\nbar")))
 	       (company-wordfreq--dictionary () ((:output "/other/path/to/dict.txt"))))
       (should (equal (company-wordfreq--candidates "bar") '("barbar" "barbaz" "bar")))))
