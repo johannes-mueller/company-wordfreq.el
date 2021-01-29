@@ -57,6 +57,10 @@
     (mocker-let ((executable-find (program) ((:input '("grep") :output nil))))
       (should-error (company-wordfreq--find-grep-program)))))
 
+(ert-deftest test-backend-interactive ()
+  (mocker-let ((company-begin-backend (backend) ((:input '(company-wordfreq)))))
+    (company-wordfreq 'interactive)))
+
 (ert-deftest test-backend-init ()
   (mocker-let ((company-wordfreq--find-grep-program () ((:occur 1))))
     (company-wordfreq 'init)))

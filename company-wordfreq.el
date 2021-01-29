@@ -1,4 +1,4 @@
-;;; company-wordfreq.el --- Company backend for human language texts
+;;; company-wordfreq.el --- Company backend for human language texts -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021 Johannes Mueller
 
@@ -6,7 +6,7 @@
 ;; URL: https://github.com/johannes-mueller/company-wordfreq.el
 ;; Version: 0.1.0
 ;; Keywords: company, convenience, matching
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Requires: ((emacs "27.1") (company "0.9"))
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -69,11 +69,12 @@
 
 ;;; Code:
 
-(require 'cl-macs)
+(require 'cl-lib)
 (require 'company)
+(require 'ispell)
 
 (defun company-wordfreq--default-path ()
-  "Set up the default for company-wordfreq-path."
+  "Set up the default for `company-wordfreq-path'."
   (concat (file-name-as-directory user-emacs-directory) "wordfreq-dicts"))
 
 (defcustom company-wordfreq-path (company-wordfreq--default-path)
@@ -86,20 +87,20 @@ the current buffer."
   :group 'company)
 
 (defvar company-wordfreq--grep-executable nil
-  "The PATH of the `rg' executable determined by backend init.")
+  "The PATH of the `grep' executable determined by backend init.")
 
 (defun company-wordfreq--find-grep-program ()
   "Find the grep executable."
   (setq company-wordfreq--grep-executable
 	(or (executable-find "grep")
-	    (error "No executable for grep found. company-wordfreq will not work."))))
+	    (error "No executable for grep found; company-wordfreq will not work"))))
 
 (defun company-wordfreq--dictionary ()
   "Determine the path of the word list file."
   (concat (file-name-as-directory company-wordfreq-path) ispell-local-dictionary ".txt"))
 
 (defun company-wordfreq--candidates (prefix)
-  "Fetches the candidates."
+  "Fetches the candidates matching PREFIX."
   (split-string
    (shell-command-to-string (concat
 			     company-wordfreq--grep-executable
@@ -109,7 +110,7 @@ the current buffer."
    "\n"))
 
 ;;;###autoload
-(defun company-wordfreq (command &optional arg &rest ignored)
+(defun company-wordfreq (command &optional arg &rest _ignored)
   "A company backend intended for writing texts in a human language.
 
 The completions it proposes are words already used in the
@@ -118,9 +119,12 @@ list file.  This word list file is supposed to be a simple list
 of words ordered by the frequency the words are used in the
 language.  So the first completions are words already used in the
 buffer followed by matching words of the language ordered by
-frequency."
+frequency.
+
+See the documentation of `company-backends' for arguments COMMAND and ARG."
   (interactive (list 'interactive))
   (cl-case command
+    (interactive (company-begin-backend 'company-wordfreq))
     (init (company-wordfreq--find-grep-program))
     (prefix (when-let ((prefix (company-grab-word)))
 	      (substring-no-properties prefix)))
@@ -137,9 +141,9 @@ frequency."
 
 ;;;###autoload
 (defun company-wordfreq-download-list ()
-  "Download a wordlist from FrequenWords and process it for use.
+  "Download a wordlist from FrequentWords and process it for use.
 
-The langauge can be chosen from a completion list. If the full
+The langauge can be chosen from a completion list.  If the full
 wordlist for the chosen language is so big, that there is a
 shorter version of 50k words available, you will be prompted to
 choose the short version.  Probably it is a good idea to choose
@@ -152,23 +156,15 @@ introduce latency to the completion proposals."
 			    (company-wordfreq--prompt-fetch-short)) "50k" "full")))
     (setq company-wordfreq--word-list-buffer
 	  (url-retrieve (company-wordfreq--dict-url lang-code kind-str)
-			'company-wordfreq--list-retrieved-callback
+			#'company-wordfreq--list-retrieved-callback
 			`(,language)
 			:inhibit-cookies))))
-
-(defun company-wordfreq--proposal-list ()
-  "Get the friendly names of the languages."
-  (mapcar 'car company-wordfreq--language-alist))
-
-(defun company-wordfreq--iso-code (language)
-  "Get the iso code of LANGUAGE"
-  (cdr (assoc language company-wordfreq--language-alist)))
 
 (defconst company-wordfreq--frequency-word-url-prefix
   "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/")
 
 (defun company-wordfreq--dict-url (lang-code kind)
-  "Setup the file path for the language LANGUAGE-CODE.
+  "Setup the file path for the language LANG-CODE.
 KIND is either \"full\" or \"50k\"."
     (concat company-wordfreq--frequency-word-url-prefix
 	    lang-code "/"
@@ -176,7 +172,7 @@ KIND is either \"full\" or \"50k\"."
 	    kind ".txt"))
 
 (defun company-wordfreq--probe-50k (lang-code)
-  "Test if a 50k version for language LANGUAGE-CODE is available."
+  "Test if a 50k version for language LANG-CODE is available."
   (let ((url-request-method "HEAD"))
     (with-current-buffer (url-retrieve-synchronously
 			  (company-wordfreq--dict-url lang-code "50k")
@@ -188,8 +184,7 @@ KIND is either \"full\" or \"50k\"."
 	(not (equal status-code "404"))))))
 
 (defun company-wordfreq--drop-http-response-header ()
-  "Delete the http response heade of the buffer the word list has
-been downloaded to."
+  "Delete the http response header from received word list."
   (goto-char (point-min))
   (re-search-forward "^$")
   (forward-char)
@@ -202,10 +197,14 @@ been downloaded to."
     (replace-match "" nil nil)))
 
 (defun company-wordfreq--prompt-fetch-short ()
+  "Prompt if the user wants the short version of the word list."
   (y-or-n-p "Use reduced length 50k words? "))
 
 (defun company-wordfreq--list-retrieved-callback (response language)
-  "Process the downloaded word list and save it to the appropriate place."
+  "Process the downloaded word list and save it to the appropriate place.
+
+RESPONSE the http response from `url-retrieve', LANGUAGE the
+language of the word list."
   (when (eq (car response) :error)
     (error "Fetching the word list failed, sorry.
 Either a problem with your net connection or something has changed with the word lis source.
@@ -279,6 +278,15 @@ Consider filing an issue"))
     ("ukrainian" . "uk")
     ("urdu" . "ur")
     ("vietnamese" . "vi")))
+
+(defun company-wordfreq--proposal-list ()
+  "Get the friendly names of the languages."
+  (mapcar #'car company-wordfreq--language-alist))
+
+(defun company-wordfreq--iso-code (language)
+  "Get the iso code of LANGUAGE."
+  (cdr (assoc language company-wordfreq--language-alist)))
+
 
 (provide 'company-wordfreq)
 ;;; company-wordfreq.el ends here
