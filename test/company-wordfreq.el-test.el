@@ -103,13 +103,13 @@
     (should (equal (company-wordfreq--default-path) "/home/user/.emacs.d/wordfreq-dicts"))))
 
 (ert-deftest test-language-proposal-list ()
-  (let ((company-wordfreq--language-alist '(("eo" "esperanto")
-					    ("en" "english"))))
+  (let ((company-wordfreq--language-alist '(("esperanto" . "eo")
+					    ("english" . "en"))))
     (should (equal (company-wordfreq--proposal-list) '("esperanto" "english")))))
 
 (ert-deftest test-language-iso-code-list ()
-  (let ((company-wordfreq--language-alist '(("eo" "esperanto")
-					    ("en" "english"))))
+  (let ((company-wordfreq--language-alist '(("esperanto" . "eo")
+					    ("english" . "en"))))
     (should (equal (company-wordfreq--iso-code "esperanto") "eo"))))
 
 (ert-deftest test-make-url-full ()
