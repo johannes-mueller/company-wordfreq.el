@@ -91,8 +91,8 @@ the current buffer."
 (defun company-wordfreq--find-grep-program ()
   "Find the grep executable."
   (setq company-wordfreq--grep-executable
-	(or (executable-find "grep")
-	    (user-error "No executable for grep found; company-wordfreq will not work"))))
+        (or (executable-find "grep")
+            (user-error "No executable for grep found; company-wordfreq will not work"))))
 
 (defun company-wordfreq--dictionary ()
   "Determine the path of the word list file."
@@ -102,10 +102,10 @@ the current buffer."
   "Fetches the candidates matching PREFIX."
   (split-string
    (shell-command-to-string (concat
-			     company-wordfreq--grep-executable
-			     " -i "
-			     (shell-quote-argument (concat "^" prefix))
-			     " " (company-wordfreq--dictionary)))
+                             company-wordfreq--grep-executable
+                             " -i "
+                             (shell-quote-argument (concat "^" prefix))
+                             " " (company-wordfreq--dictionary)))
    "\n"))
 
 ;;;###autoload
@@ -126,14 +126,14 @@ See the documentation of `company-backends' for arguments COMMAND and ARG."
     (interactive (company-begin-backend 'company-wordfreq))
     (init (company-wordfreq--find-grep-program))
     (prefix (when-let ((prefix (company-grab-word)))
-	      (substring-no-properties prefix)))
+              (substring-no-properties prefix)))
     (sorted t)
     (duplicates nil)
     (ignore-case 'keep-prefix)
     (candidates (let ((candidates (append (company-dabbrev 'candidates arg)
-					  (company-wordfreq--candidates arg)))
-		      (completion-ignore-case t))
-		  (all-completions arg (delete-dups candidates))))))
+                                          (company-wordfreq--candidates arg)))
+                      (completion-ignore-case t))
+                  (all-completions arg (delete-dups candidates))))))
 
 (defvar company-wordfreq--word-list-buffer nil
   "Pointer to the buffer a word list has been downloaded to.")
@@ -150,14 +150,14 @@ the short version as the full versions can be quite huge and
 introduce latency to the completion proposals."
   (interactive)
   (let* ((language (completing-read "Choose language: " (company-wordfreq--proposal-list)))
-	 (lang-code (company-wordfreq--iso-code language))
-	 (kind-str (if (and (company-wordfreq--probe-50k lang-code)
-			    (company-wordfreq--prompt-fetch-short)) "50k" "full")))
+         (lang-code (company-wordfreq--iso-code language))
+         (kind-str (if (and (company-wordfreq--probe-50k lang-code)
+                            (company-wordfreq--prompt-fetch-short)) "50k" "full")))
     (setq company-wordfreq--word-list-buffer
-	  (url-retrieve (company-wordfreq--dict-url lang-code kind-str)
-			#'company-wordfreq--list-retrieved-callback
-			`(,language)
-			:inhibit-cookies))))
+          (url-retrieve (company-wordfreq--dict-url lang-code kind-str)
+                        #'company-wordfreq--list-retrieved-callback
+                        `(,language)
+                        :inhibit-cookies))))
 
 (defconst company-wordfreq--frequency-word-url-prefix
   "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/")
@@ -166,21 +166,21 @@ introduce latency to the completion proposals."
   "Setup the file path for the language LANG-CODE.
 KIND is either \"full\" or \"50k\"."
     (concat company-wordfreq--frequency-word-url-prefix
-	    lang-code "/"
-	    lang-code "_"
-	    kind ".txt"))
+            lang-code "/"
+            lang-code "_"
+            kind ".txt"))
 
 (defun company-wordfreq--probe-50k (lang-code)
   "Test if a 50k version for language LANG-CODE is available."
   (let ((url-request-method "HEAD"))
     (with-current-buffer (url-retrieve-synchronously
-			  (company-wordfreq--dict-url lang-code "50k")
-			  :inhibit-cookies)
+                          (company-wordfreq--dict-url lang-code "50k")
+                          :inhibit-cookies)
       (goto-char (point-min))
       (let ((status-code
-	     (nth 1 (split-string (car (split-string (buffer-string) "\n")) " "))))
-	(kill-current-buffer)
-	(not (equal status-code "404"))))))
+             (nth 1 (split-string (car (split-string (buffer-string) "\n")) " "))))
+        (kill-current-buffer)
+        (not (equal status-code "404"))))))
 
 (defun company-wordfreq--drop-http-response-header ()
   "Delete the http response header from received word list."
@@ -214,7 +214,7 @@ the word list source.  Consider filing an issue"))
     (unless (file-directory-p company-wordfreq-path)
       (make-directory company-wordfreq-path))
     (write-file (concat (file-name-as-directory company-wordfreq-path)
-			language ".txt"))
+                        language ".txt"))
     (kill-current-buffer)
     (setq company-wordfreq--word-list-buffer nil)))
 
