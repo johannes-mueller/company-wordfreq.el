@@ -34,7 +34,7 @@
 ;; noticing.
 ;;
 ;; The directory where the word list files reside is determined by the variable
-;; `company-word-freq-path', default `~/.emacs.d/wordfreq-dicts'.  Their
+;; `company-wordfreq-path', default `~/.emacs.d/wordfreq-dicts'.  Their
 ;; names must follow the pattern `<language>.txt' where language is the
 ;; `ispell-local-dictionary' value of the current language.
 ;;
@@ -143,7 +143,7 @@ See the documentation of `company-backends' for arguments COMMAND and ARG."
 (defun company-wordfreq-download-list ()
   "Download a wordlist from FrequentWords and process it for use.
 
-The langauge can be chosen from a completion list.  If the full
+The language can be chosen from a completion list.  If the full
 wordlist for the chosen language is so big, that there is a
 shorter version of 50k words available, you will be prompted to
 choose the short version.  Probably it is a good idea to choose
@@ -191,7 +191,7 @@ KIND is either \"full\" or \"50k\"."
   (delete-region (point-min) (point)))
 
 (defun company-wordfreq--drop-frequency-values ()
-  "Delete the frequency valuee after each word in the word list."
+  "Delete the frequency value after each word in the word list."
   (goto-char (point-min))
   (while (re-search-forward "\s[0-9]+$" nil t)
     (replace-match "" nil nil)))
@@ -207,8 +207,8 @@ RESPONSE the http response from `url-retrieve', LANGUAGE the
 language of the word list."
   (when (eq (car response) :error)
     (error "Fetching the word list failed, sorry.
-Either a problem with your net connection or something has changed with the word lis source.
-Consider filing an issue"))
+Either a problem with your net connection or something has changed with
+the word list source.  Consider filing an issue"))
   (with-current-buffer company-wordfreq--word-list-buffer
     (company-wordfreq--drop-http-response-header)
     (company-wordfreq--drop-frequency-values)
