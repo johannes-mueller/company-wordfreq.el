@@ -12,38 +12,38 @@
 (ert-deftest test-candidates-foo ()
   (let ((company-wordfreq--grep-executable "/path/to/grep-program"))
     (mocker-let ((shell-command-to-string (command)
-					  ((:input
-					    '("/path/to/grep-program -i \\^foo /path/to/dict.txt")
-					   :output "foobar\nfoobaz\nfoo")))
-		(company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
+                                          ((:input
+                                            '("/path/to/grep-program -i \\^foo /path/to/dict.txt")
+                                           :output "foobar\nfoobaz\nfoo")))
+                (company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
      (should (equal (company-wordfreq--candidates "foo") '("foobar" "foobaz" "foo"))))))
 
 (ert-deftest test-candidates-foo-case-sensitive ()
   (let ((company-wordfreq--grep-executable "/path/to/grep-program"))
     (mocker-let ((shell-command-to-string (command)
-					  ((:input
-					    '("/path/to/grep-program -i \\^Foo /path/to/dict.txt")
-					   :output "foobar\nfoobaz\nfoo")))
-		(company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
+                                          ((:input
+                                            '("/path/to/grep-program -i \\^Foo /path/to/dict.txt")
+                                           :output "foobar\nfoobaz\nfoo")))
+                (company-wordfreq--dictionary () ((:output "/path/to/dict.txt"))))
      (should (equal (company-wordfreq--candidates "Foo") '("foobar" "foobaz" "foo"))))))
 
 (ert-deftest test-candidates-bar ()
   (let ((company-wordfreq--grep-executable "/other/path/to/grep-program"))
     (mocker-let ((shell-command-to-string (command)
-					  ((:input
-					    '("/other/path/to/grep-program -i \\^bar /other/path/to/dict.txt")
-					    :output "barbar\nbarbaz\nbar")))
-		(company-wordfreq--dictionary () ((:output "/other/path/to/dict.txt"))))
+                                          ((:input
+                                            '("/other/path/to/grep-program -i \\^bar /other/path/to/dict.txt")
+                                            :output "barbar\nbarbaz\nbar")))
+                (company-wordfreq--dictionary () ((:output "/other/path/to/dict.txt"))))
      (should (equal (company-wordfreq--candidates "bar") '("barbar" "barbaz" "bar"))))))
 
 (ert-deftest test-dict-path-esperanto ()
   (let ((ispell-local-dictionary "esperanto")
-	(company-wordfreq-path "/path/to/dicts"))
+        (company-wordfreq-path "/path/to/dicts"))
     (should (equal (company-wordfreq--dictionary) "/path/to/dicts/esperanto.txt"))))
 
 (ert-deftest test-dict-path-english ()
   (let ((ispell-local-dictionary "english")
-	(company-wordfreq-path "/other/path/to/dicts"))
+        (company-wordfreq-path "/other/path/to/dicts"))
     (should (equal (company-wordfreq--dictionary) "/other/path/to/dicts/english.txt"))))
 
 (ert-deftest test-find-grep-program ()
@@ -79,12 +79,12 @@
 
 (ert-deftest test-backend-candidates-foo ()
   (mocker-let ((company-wordfreq--candidates (prefix) ((:input '("foo") :output '("foo" "foobar" "foobaz"))))
-	       (company-dabbrev (cmd arg) ((:input '(candidates "foo") :output nil))))
+               (company-dabbrev (cmd arg) ((:input '(candidates "foo") :output nil))))
     (should (equal (company-wordfreq 'candidates "foo") '("foo" "foobar" "foobaz")))))
 
 (ert-deftest test-backend-candidates-bar ()
   (mocker-let ((company-wordfreq--candidates (prefix) ((:input '("bar") :output '("bar" "barbar" "barbaz"))))
-	       (company-dabbrev (cmd arg) ((:input '(candidates "bar") :output nil))))
+               (company-dabbrev (cmd arg) ((:input '(candidates "bar") :output nil))))
     (should (equal (company-wordfreq 'candidates "bar") '("bar" "barbar" "barbaz")))))
 
 (ert-deftest test-backend-candidates-bar-deduplicate ()
@@ -108,21 +108,21 @@
 
 (ert-deftest test-language-proposal-list ()
   (let ((company-wordfreq--language-alist '(("esperanto" . "eo")
-					    ("english" . "en"))))
+                                            ("english" . "en"))))
     (should (equal (company-wordfreq--proposal-list) '("esperanto" "english")))))
 
 (ert-deftest test-language-iso-code-list ()
   (let ((company-wordfreq--language-alist '(("esperanto" . "eo")
-					    ("english" . "en"))))
+                                            ("english" . "en"))))
     (should (equal (company-wordfreq--iso-code "esperanto") "eo"))))
 
 (ert-deftest test-make-url-full ()
   (should (equal (company-wordfreq--dict-url "eo" "full")
-		 "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/eo/eo_full.txt")))
+                 "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/eo/eo_full.txt")))
 
 (ert-deftest test-make-url-50k ()
   (should (equal (company-wordfreq--dict-url "eo" "50k")
-		 "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/eo/eo_50k.txt")))
+                 "https://raw.githubusercontent.com/johannes-mueller/FrequencyWords/master/content/2018/eo/eo_50k.txt")))
 
 (defun return-code (code)
   (let ((buffer (generate-new-buffer "urltmp")))
@@ -133,21 +133,21 @@
 (ert-deftest test-probe-50k-word-list-true ()
   (mocker-let
       ((url-retrieve-synchronously (url inhibit-cookies)
-				   ((:input
-				     '("http://example.com/eo_50k.txt" :inhibit-cookies)
-				     :output (return-code "200 OK"))))
+                                   ((:input
+                                     '("http://example.com/eo_50k.txt" :inhibit-cookies)
+                                     :output (return-code "200 OK"))))
        (company-wordfreq--dict-url (lang-code kind)
-				   ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt"))))
+                                   ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt"))))
     (should (company-wordfreq--probe-50k "eo"))))
 
 (ert-deftest test-probe-50k-word-list-false ()
   (mocker-let
       ((url-retrieve-synchronously (url inhibit-cookies)
-				   ((:input
-				     '("http://example.com/eo_50k.txt" :inhibit-cookies)
-				     :output (return-code "404 Not Found"))))
+                                   ((:input
+                                     '("http://example.com/eo_50k.txt" :inhibit-cookies)
+                                     :output (return-code "404 Not Found"))))
        (company-wordfreq--dict-url (lang-code kind)
-				   ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt"))))
+                                   ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt"))))
     (should-not (company-wordfreq--probe-50k "eo"))))
 
 (ert-deftest test-drop-frequency-values ()
@@ -167,65 +167,65 @@ estas 10726
 (ert-deftest test-download-new-word-list-no50k ()
   (let ((company-wordfreq--word-list-buffer nil))
     (mocker-let ((company-wordfreq--proposal-list () ((:output '("esperanto" "english"))))
-		(completing-read (prompt choices)
-				 ((:input
-				   '("Choose language: " ("esperanto" "english"))
-				   :output "esperanto")))
-		(company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
-		(company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output nil)))
-		(company-wordfreq--prompt-fetch-short () ((:occur 0)))
-		(company-wordfreq--dict-url (lang-code kind)
-					    ((:input '("eo" "full") :output "http://example.com/eo_full.txt")))
-		(url-retrieve (url callback language inhibit-cookies)
-			      ((:input
-				'("http://example.com/eo_full.txt"
-				  company-wordfreq--list-retrieved-callback
-				  ("esperanto")
-				  :inhibit-cookies)
-				:output 'buffer))))
+                (completing-read (prompt choices)
+                                 ((:input
+                                   '("Choose language: " ("esperanto" "english"))
+                                   :output "esperanto")))
+                (company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
+                (company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output nil)))
+                (company-wordfreq--prompt-fetch-short () ((:occur 0)))
+                (company-wordfreq--dict-url (lang-code kind)
+                                            ((:input '("eo" "full") :output "http://example.com/eo_full.txt")))
+                (url-retrieve (url callback language inhibit-cookies)
+                              ((:input
+                                '("http://example.com/eo_full.txt"
+                                  company-wordfreq--list-retrieved-callback
+                                  ("esperanto")
+                                  :inhibit-cookies)
+                                :output 'buffer))))
      (company-wordfreq-download-list)
      (should (eq company-wordfreq--word-list-buffer 'buffer)))))
 
 (ert-deftest test-download-new-word-list-50k-no ()
   (let ((company-wordfreq--word-list-buffer nil))
     (mocker-let ((company-wordfreq--proposal-list () ((:output '("esperanto" "english"))))
-		(completing-read (prompt choices)
-				 ((:input
-				   '("Choose language: " ("esperanto" "english"))
-				   :output "esperanto")))
-		(company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
-		(company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output t)))
-		(company-wordfreq--prompt-fetch-short () ((:output nil)))
-		(company-wordfreq--dict-url (lang-code kind)
-					    ((:input '("eo" "full") :output "http://example.com/eo_full.txt")))
-		(url-retrieve (url callback language inhibit-cookies)
-			      ((:input
-				'("http://example.com/eo_full.txt"
-				  company-wordfreq--list-retrieved-callback
-				  ("esperanto")
-				  :inhibit-cookies)
-				:output 'buffer))))
+                (completing-read (prompt choices)
+                                 ((:input
+                                   '("Choose language: " ("esperanto" "english"))
+                                   :output "esperanto")))
+                (company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
+                (company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output t)))
+                (company-wordfreq--prompt-fetch-short () ((:output nil)))
+                (company-wordfreq--dict-url (lang-code kind)
+                                            ((:input '("eo" "full") :output "http://example.com/eo_full.txt")))
+                (url-retrieve (url callback language inhibit-cookies)
+                              ((:input
+                                '("http://example.com/eo_full.txt"
+                                  company-wordfreq--list-retrieved-callback
+                                  ("esperanto")
+                                  :inhibit-cookies)
+                                :output 'buffer))))
      (company-wordfreq-download-list)
      (should (eq company-wordfreq--word-list-buffer 'buffer)))))
 
 (ert-deftest test-download-new-word-list-50k-yes ()
   (let ((company-wordfreq--word-list-buffer nil))
     (mocker-let ((company-wordfreq--proposal-list () ((:output '("esperanto" "english"))))
-		(completing-read (prompt choices)
-				 ((:input
-				   '("Choose language: " ("esperanto" "english"))
-				   :output "esperanto")))
-		(company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
-		(company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output t)))
-		(company-wordfreq--prompt-fetch-short () ((:output t)))
-		(company-wordfreq--dict-url (lang-code kind)
-					    ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt")))
-		(url-retrieve (url callback language inhibit-cookies)
-			      ((:input '("http://example.com/eo_50k.txt"
-					 company-wordfreq--list-retrieved-callback
-					 ("esperanto")
-					 :inhibit-cookies)
-				       :output 'buffer))))
+                (completing-read (prompt choices)
+                                 ((:input
+                                   '("Choose language: " ("esperanto" "english"))
+                                   :output "esperanto")))
+                (company-wordfreq--iso-code (language) ((:input '("esperanto") :output "eo")))
+                (company-wordfreq--probe-50k (lang-code) ((:input '("eo") :output t)))
+                (company-wordfreq--prompt-fetch-short () ((:output t)))
+                (company-wordfreq--dict-url (lang-code kind)
+                                            ((:input '("eo" "50k") :output "http://example.com/eo_50k.txt")))
+                (url-retrieve (url callback language inhibit-cookies)
+                              ((:input '("http://example.com/eo_50k.txt"
+                                         company-wordfreq--list-retrieved-callback
+                                         ("esperanto")
+                                         :inhibit-cookies)
+                                       :output 'buffer))))
      (company-wordfreq-download-list)
      (should (eq company-wordfreq--word-list-buffer 'buffer)))))
 
@@ -244,9 +244,9 @@ estas 10726
 
 (ert-deftest test-list-retrieved-callback-success ()
   (let ((company-wordfreq--word-list-buffer (generate-new-buffer "word-list-test-buffer"))
-	(company-wordfreq-path (concat (file-name-directory (temporary-file-directory))
-				       (make-temp-name ".emacs.d")))
-	(buffer-tmp nil))
+        (company-wordfreq-path (concat (file-name-directory (temporary-file-directory))
+                                       (make-temp-name ".emacs.d")))
+        (buffer-tmp nil))
     (with-current-buffer company-wordfreq--word-list-buffer
       (insert "HTTP/1.1 200 OK
 other headers
@@ -259,9 +259,9 @@ estas 10726
     (setq buffer-tmp company-wordfreq--word-list-buffer)
     (company-wordfreq--list-retrieved-callback '(:peer 'foo) "esperanto")
     (should (equal (with-temp-buffer
-		     (insert-file-contents (concat (file-name-as-directory company-wordfreq-path)
-						   "esperanto.txt"))
-		     (buffer-string)) "mi\nvi\nne\nestas\n"))
+                     (insert-file-contents (concat (file-name-as-directory company-wordfreq-path)
+                                                   "esperanto.txt"))
+                     (buffer-string)) "mi\nvi\nne\nestas\n"))
     (should-error (switch-to-buffer buffer-tmp))
     (should (eq company-wordfreq--word-list-buffer nil))))
 
