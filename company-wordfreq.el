@@ -29,9 +29,8 @@
 ;;
 ;; `company-wordfreq' does not come with the word list files directly, but it
 ;; can download the files for you for many languages from
-;; <https://github.com/hermitdave/FrequencyWords>.  I made a fork of this repo
-;; to make sure, that the original does not change all over sudden without my
-;; noticing.
+;; <https://github.com/hermitdave/FrequencyWords>.  I made a fork of that repo
+;; just in case the original changes all over sudden without my noticing.
 ;;
 ;; The directory where the word list files reside is determined by the variable
 ;; `company-wordfreq-path', default `~/.emacs.d/wordfreq-dicts'.  Their
