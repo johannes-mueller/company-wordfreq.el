@@ -1,4 +1,5 @@
 [[https://github.com/johannes-mueller/company-wordfreq.el/actions?query=workflow%3ATests][https://github.com/johannes-mueller/company-wordfreq.el/workflows/Tests/badge.svg]]
+[[https://melpa.org/#/company-wordfreq][file:https://melpa.org/packages/company-wordfreq-badge.svg]]
 
 * company-wordfreq
 
@@ -49,8 +50,10 @@ Windows you might have to tweak it somehow.
 
 ** Installation
 
-Hopefully from MELPA one day.  As long as it is not, it is probably easiest to use
-[[https://github.com/raxod502/straight.el][straight.el]].  Put the following lines into your init file.
+Easiest way to install is from [[https://melpa.org][MELPA]].  If you have configured the MELPA sources
+you can just install the =company-wordfreq= package.
+
+If you prefer [[https://github.com/raxod502/straight.el][straight.el]], put the following lines into your init file.
 
 #+BEGIN_EXAMPLE emacs-lisp
 (straight-use-package
