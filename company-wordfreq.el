@@ -93,7 +93,7 @@ the current buffer."
   "Find the grep executable."
   (setq company-wordfreq--grep-executable
 	(or (executable-find "grep")
-	    (error "No executable for grep found; company-wordfreq will not work"))))
+	    (user-error "No executable for grep found; company-wordfreq will not work"))))
 
 (defun company-wordfreq--dictionary ()
   "Determine the path of the word list file."
@@ -206,7 +206,7 @@ KIND is either \"full\" or \"50k\"."
 RESPONSE the http response from `url-retrieve', LANGUAGE the
 language of the word list."
   (when (eq (car response) :error)
-    (error "Fetching the word list failed, sorry.
+    (user-error "Fetching the word list failed, sorry.
 Either a problem with your net connection or something has changed with
 the word list source.  Consider filing an issue"))
   (with-current-buffer company-wordfreq--word-list-buffer
