@@ -18,19 +18,26 @@ jobs:
       matrix:
         emacs_version:
           - '27.1'
+          - '27.2'
+          - '28.1'
+          - '28.2'
+          - 'release-snapshot'
           - 'snapshot'
         include:
           - emacs_version: 'snapshot'
             allow_failure: true
+          - emacs_version: 'release-snapshot'
+            allow_failure: true            
     steps:
       - uses: actions/checkout@v2
       - uses: purcell/setup-emacs@master
         with:
           version: ${{ matrix.emacs_version }}
 
-      - name: Install cask
-        run: 'curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python'
-
+      - uses: conao3/setup-cask@master
+        with:
+          version: 'snapshot'
+          
       - name: Install dependencies
         run: '$HOME/.cask/bin/cask install'
 
